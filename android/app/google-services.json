@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "813228169481",
+    "project_id": "whisper-39141",
+    "storage_bucket": "whisper-39141.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:813228169481:android:7edf22cac47ffb1cf5dbd8",
+        "android_client_info": {
+          "package_name": "com.example.textual_chat_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBy692QYi488KDDqxLHNF8Bvh0266QcWN4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
