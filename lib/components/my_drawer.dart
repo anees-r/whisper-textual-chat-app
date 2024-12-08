@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:textual_chat_app/app_assets.dart';
-import 'package:textual_chat_app/auth/auth_service.dart';
+import 'package:textual_chat_app/services/auth/auth_service.dart';
 import 'package:textual_chat_app/screens/settings_screen.dart';
 
 class MyDrawer extends StatefulWidget {
@@ -16,8 +16,8 @@ class _MyDrawerState extends State<MyDrawer> {
   // log out method
   void _logout() {
     // getting auth service
-    final _authService = AuthService();
-    _authService.logOut();
+    final authService = AuthService();
+    authService.logOut();
   }
   
   @override
@@ -51,8 +51,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 style: TextStyle(
                   color: Theme.of(context)
                       .colorScheme
-                      .secondaryContainer
-                      .withOpacity(0.5),
+                      .secondaryContainer,
                   fontFamily: "Hoves",
                   fontSize: 20,
                   //fontWeight: FontWeight.bold,
@@ -62,8 +61,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 AppAssets.homeIcon,
                 color: Theme.of(context)
                     .colorScheme
-                    .secondaryContainer
-                    .withOpacity(0.5),
+                    .secondaryContainer,
               ),
               onTap: () {
                 // pop the drawer
@@ -81,8 +79,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 style: TextStyle(
                   color: Theme.of(context)
                       .colorScheme
-                      .secondaryContainer
-                      .withOpacity(0.5),
+                      .secondaryContainer,
                   fontFamily: "Hoves",
                   fontSize: 20,
                   //fontWeight: FontWeight.bold,
@@ -92,14 +89,13 @@ class _MyDrawerState extends State<MyDrawer> {
                 AppAssets.settingsIcon,
                 color: Theme.of(context)
                     .colorScheme
-                    .secondaryContainer
-                    .withOpacity(0.5),
+                    .secondaryContainer,
               ),
               onTap: () {
                 // navigate to settings screen
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SettingsScreen()));
+                  MaterialPageRoute(builder: (context) => const SettingsScreen()));
               },
             ),
           ),
@@ -115,8 +111,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 style: TextStyle(
                   color: Theme.of(context)
                       .colorScheme
-                      .secondaryContainer
-                      .withOpacity(0.5),
+                      .secondaryContainer,
                   fontFamily: "Hoves",
                   fontSize: 20,
                   //fontWeight: FontWeight.bold,
@@ -126,8 +121,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 AppAssets.logoutIcon,
                 color: Theme.of(context)
                     .colorScheme
-                    .secondaryContainer
-                    .withOpacity(0.5),
+                    .secondaryContainer,
               ),
               onTap: () {
                  _logout();

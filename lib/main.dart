@@ -1,10 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:textual_chat_app/auth/auth_gate.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:provider/provider.dart';
+import 'package:textual_chat_app/services/auth/auth_gate.dart';
 import 'package:textual_chat_app/firebase_options.dart';
-import 'package:textual_chat_app/themes/dark_theme.dart';
-import 'package:textual_chat_app/themes/light_theme.dart';
+import 'package:textual_chat_app/themes/theme_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,12 +13,20 @@ Future<void> main() async {
   // Load the .env file
   await dotenv.load(fileName: ".env");
 
+  // init hive
+  await Hive.initFlutter();
+
   // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeProvider(),
+      child: const MyApp(),
+    )
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -28,8 +37,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
-      theme: lightTheme,
-      darkTheme: darkTheme,
+      theme: Provider.of<ThemeProvider>(context).themeData,
 
       home: const AuthGate(),
     );

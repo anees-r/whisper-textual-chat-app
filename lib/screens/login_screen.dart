@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:textual_chat_app/app_assets.dart';
-import 'package:textual_chat_app/auth/auth_service.dart';
+import 'package:textual_chat_app/services/auth/auth_service.dart';
 import 'package:textual_chat_app/components/my_button.dart';
 import 'package:textual_chat_app/components/my_textfield.dart';
 
@@ -16,11 +16,11 @@ class LoginScreen extends StatefulWidget {
   // login method
   void _login(BuildContext context) async {
     // get auth service
-    final _authService = AuthService();
+    final authService = AuthService();
 
     // log in
     try {
-      await _authService.loginWithEmailPassword(
+      await authService.loginWithEmailPassword(
           _emailController.text, _pwController.text);
     } catch (e) {
       showDialog(
@@ -92,8 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
               style: TextStyle(
                 color: Theme.of(context)
                     .colorScheme
-                    .secondaryContainer
-                    .withOpacity(0.5),
+                    .secondaryContainer,
                 fontFamily: "Hoves",
                 fontSize: 16,
               ),
@@ -153,8 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(
                       color: Theme.of(context)
                           .colorScheme
-                          .secondaryContainer
-                          .withOpacity(0.5),
+                          .secondaryContainer,
                       fontFamily: "Hoves",
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

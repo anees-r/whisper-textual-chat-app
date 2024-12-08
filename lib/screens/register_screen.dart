@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:textual_chat_app/app_assets.dart';
-import 'package:textual_chat_app/auth/auth_service.dart';
+import 'package:textual_chat_app/services/auth/auth_service.dart';
 import 'package:textual_chat_app/components/my_button.dart';
 import 'package:textual_chat_app/components/my_textfield.dart';
 
@@ -15,12 +15,12 @@ class RegisterScreen extends StatefulWidget {
   final TextEditingController _confirmPwController = TextEditingController();
 
   void _register(BuildContext context) async {
-    final _authService = AuthService();
+    final authService = AuthService();
 
     // register if passwords match
     if (_pwController.text == _confirmPwController.text) {
       try {
-        await _authService.registerWithEmailPassword(
+        await authService.registerWithEmailPassword(
             _emailController.text, _pwController.text);
       } catch (e) {
         showDialog(
@@ -120,8 +120,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               style: TextStyle(
                 color: Theme.of(context)
                     .colorScheme
-                    .secondaryContainer
-                    .withOpacity(0.5),
+                    .secondaryContainer,
                 fontFamily: "Hoves",
                 fontSize: 16,
               ),
@@ -192,8 +191,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: TextStyle(
                       color: Theme.of(context)
                           .colorScheme
-                          .secondaryContainer
-                          .withOpacity(0.5),
+                          .secondaryContainer,
                       fontFamily: "Hoves",
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
