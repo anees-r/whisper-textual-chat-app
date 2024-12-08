@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // extracted methods
   Widget _buildUserList() {
     return StreamBuilder(
-        stream: widget._chatService.getUserStream(),
+        stream: widget._chatService.getUserStreamExcludingBlocked(),
         builder: (context, snapshot) {
           // error
           if (snapshot.hasError) {
@@ -60,6 +60,19 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           }
 
+          // if no users
+          if (snapshot.data!.isEmpty) {
+            return Center(
+              child: Text(
+                "No Whisperers!",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.4),
+                  fontFamily: "Hoves",
+                  fontSize: 16,
+                ),
+              ),
+            );
+          }
 
           // loading
           if (snapshot.connectionState == ConnectionState.waiting) {

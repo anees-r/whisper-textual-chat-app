@@ -31,6 +31,7 @@ class AppAssets {
   static String sendIcon = "assets/icons/send.svg";
   static String settingsIcon = "assets/icons/settings.svg";
   static String userIcon = "assets/icons/user.svg";
+  static String deleteIcon = "assets/icons/delete.svg";
 
   // logo
 

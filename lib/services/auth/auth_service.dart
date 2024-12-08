@@ -58,5 +58,10 @@ class AuthService {
     return await auth.signOut();
   }
 
-  // errors
+  // delete account
+  // Future<void> deleteAccount() async{
+  //   await auth.currentUser!.delete();
+  //   await FirebaseFirestore.instance.collection('users').doc(auth.currentUser!.uid).delete();
+  //   return;
+  // }
 }

@@ -85,6 +85,7 @@ class _ChatScreenState extends State<ChatScreen> {
         scrolledUnderElevation:0,
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         foregroundColor: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
+        leading: IconButton(onPressed: () => Navigator.pop(context), icon: Icon(Icons.arrow_back_ios_rounded)),
         title: Text(
           widget.receiverEmail,
           style: const TextStyle(
@@ -92,6 +93,7 @@ class _ChatScreenState extends State<ChatScreen> {
             fontSize: 20,
           ),
         ),
+        centerTitle: true,
       ),
       body: Column(
         children: [
@@ -139,6 +141,20 @@ class _ChatScreenState extends State<ChatScreen> {
             );
           }
 
+          // if no messages
+          if (snapshot.data!.docs.isEmpty) {
+            return Center(
+              child: Text(
+                "No Whispers!",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.4),
+                  fontFamily: "Hoves",
+                  fontSize: 16,
+                ),
+              ),
+            );
+          }
+
           // return listview
           return ListView(
             controller: _scrollController,
@@ -161,7 +177,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return Container(
       alignment: alignment,
       child: 
-        ChatBubble(message: data["message"], isCurrentUser: isCurrentUser)
+        ChatBubble(message: data["message"], isCurrentUser: isCurrentUser, messageID: doc.id, userID: data["senderId"],)
     );
   }
 
