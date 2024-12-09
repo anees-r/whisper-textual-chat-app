@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:textual_chat_app/services/chat/chat_service.dart';
 
 class AuthService {
   // instance of auth
@@ -7,7 +8,7 @@ class AuthService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // get current user
-  User? getCurrentUser(){
+  User? getCurrentUser() {
     return auth.currentUser;
   }
 
@@ -18,12 +19,10 @@ class AuthService {
           email: email, password: password);
 
       // save user data in separate document of users collection
-      _firestore.collection("users").doc(userCredential.user!.uid).set(
-        {
-          'uid': userCredential.user!.uid,
-          'email': email,
-        }
-      );
+      _firestore.collection("users").doc(userCredential.user!.uid).set({
+        'uid': userCredential.user!.uid,
+        'email': email,
+      });
 
       return userCredential;
     } on FirebaseAuthException catch (e) {
@@ -39,18 +38,15 @@ class AuthService {
           email: email, password: password);
 
       // save user data in separate document of users collection
-      _firestore.collection("users").doc(userCredential.user!.uid).set(
-        {
-          'uid': userCredential.user!.uid,
-          'email': email,
-        }
-      );
+      _firestore.collection("users").doc(userCredential.user!.uid).set({
+        'uid': userCredential.user!.uid,
+        'email': email,
+      });
 
       return userCredential;
     } on FirebaseAuthException catch (e) {
       throw Exception(e.code);
     }
-
   }
 
   // log out
@@ -59,9 +55,10 @@ class AuthService {
   }
 
   // delete account
-  // Future<void> deleteAccount() async{
-  //   await auth.currentUser!.delete();
-  //   await FirebaseFirestore.instance.collection('users').doc(auth.currentUser!.uid).delete();
-  //   return;
-  // }
+  Future<void> deleteAccount() async {
+    final _chatService = ChatService();
+    _chatService.deleteMessagesFromCurrent();
+    _firestore.collection("users").doc(auth.currentUser!.uid).update({'email': 'Deleted Account'});
+    auth.currentUser!.delete();
+  }
 }

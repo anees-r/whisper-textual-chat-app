@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:textual_chat_app/app_assets.dart';
 import 'package:textual_chat_app/screens/blocked_users_screen.dart';
 import 'package:textual_chat_app/services/auth/auth_service.dart';
-import 'package:textual_chat_app/services/auth/login_or_register.dart';
 import 'package:textual_chat_app/themes/theme_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -16,7 +15,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   void _showDeleteBox(BuildContext context) {
-    final _auth = AuthService();
+    final _authService = AuthService();
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -52,12 +51,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     child: const Text("Cancel")),
                 ElevatedButton(
-                    onPressed: () {
-                      // pop everything and redirect to home
+                    onPressed: () async {
                       Navigator.pop(context);
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                      //_auth.deleteAccount();
+                      _authService.deleteAccount();
+                      
+                      
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(

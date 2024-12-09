@@ -20,8 +20,8 @@ class ChatService extends ChangeNotifier {
     });
   }
 
-  // get non blocked users stream
-  Stream<List<Map<String, dynamic>>> getUserStreamExcludingBlocked() {
+  // get non blocked and non deleted users stream
+  Stream<List<Map<String, dynamic>>> getUserStreamExcludingBlockedAndDeleted() {
     final currentUser = _auth.currentUser;
 
     return _firestore
@@ -33,6 +33,14 @@ class ChatService extends ChangeNotifier {
       // get blocked users id
       final blockedUserIDs = snapshot.docs.map((doc) => doc.id).toList();
 
+      final deletedUsersSnapshot = await _firestore
+          .collection("users")
+          .doc(currentUser.uid)
+          .collection("deleted_users")
+          .get();
+      final deletedUserIDs =
+          deletedUsersSnapshot.docs.map((doc) => doc.id).toList();
+
       // get all users
       final userSnapshot = await _firestore.collection("users").get();
 
@@ -40,7 +48,8 @@ class ChatService extends ChangeNotifier {
       return userSnapshot.docs
           .where((doc) =>
               doc.data()["email"] != currentUser.email &&
-              !blockedUserIDs.contains(doc.id))
+              !blockedUserIDs.contains(doc.id) &&
+              !deletedUserIDs.contains(doc.id))
           .map((doc) => doc.data())
           .toList();
     });
@@ -66,6 +75,9 @@ class ChatService extends ChangeNotifier {
     // ensure both users have same chat room no matter who logs in
     ids.sort();
     String chatRoomId = ids.join("_");
+
+    // creating chatroom document
+    await _firestore.collection("chat_room").doc(chatRoomId).set({});
 
     // save new message to the database
     await _firestore
@@ -140,5 +152,66 @@ class ChatService extends ChangeNotifier {
           .map((id) => _firestore.collection("users").doc(id).get()));
       return userDocs.map((doc) => doc.data() as Map<String, dynamic>).toList();
     });
+  }
+
+  // delete messages
+  Future<void> deleteMessagesFromCurrent() async {
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+    try {
+      // Get all chat room documents
+      QuerySnapshot chatRoomsSnapshot =
+          await _firestore.collection('chat_room').get();
+
+      for (var chatRoomDoc in chatRoomsSnapshot.docs) {
+        // Access the messages subcollection for each chat room
+        QuerySnapshot messagesSnapshot = await _firestore
+            .collection('chat_room')
+            .doc(chatRoomDoc.id)
+            .collection('messages')
+            .where('senderId', isEqualTo: _auth.currentUser!.uid)
+            .get();
+
+        // Delete each message document that matches the senderId
+        for (var messageDoc in messagesSnapshot.docs) {
+          await _firestore
+              .collection('chat_room')
+              .doc(chatRoomDoc.id)
+              .collection('messages')
+              .doc(messageDoc.id)
+              .delete();
+          print(
+              "Deleted message with ID: ${messageDoc.id} in chat room: ${chatRoomDoc.id}");
+        }
+      }
+
+      print("Deletion process completed.");
+    } catch (e) {
+      print("Error deleting messages: $e");
+    }
+  }
+
+  // delete chat room if the other user is deleted
+  Future<void> deleteChatRoom(String userID) async {
+    // create chatroom id
+    List<String> ids = [userID, _auth.currentUser!.uid];
+    ids.sort();
+    String chatRoomId = ids.join("_");
+
+    _firestore.collection("chat_room").doc(chatRoomId).delete();
+    deleteUser(userID);
+    notifyListeners();
+  }
+
+  // add to deleted user list
+  Future<void> deleteUser(String userID) async {
+    final currentUser = _auth.currentUser;
+    await _firestore
+        .collection("users")
+        .doc(currentUser!.uid)
+        .collection("deleted_users")
+        .doc(userID)
+        .set({});
+    notifyListeners();
   }
 }

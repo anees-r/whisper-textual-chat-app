@@ -155,7 +155,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
             if (blockedUser.isEmpty){
               return Center(
                 child: Text(
-              "No blocked whisperers",
+              "No blocked whisperers!",
               style: TextStyle(
                 color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.4),
                 fontFamily: "Hoves",

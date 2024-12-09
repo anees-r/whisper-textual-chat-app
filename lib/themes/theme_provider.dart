@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:textual_chat_app/themes/dark_theme.dart';
 import 'package:textual_chat_app/themes/light_theme.dart';
-import 'package:textual_chat_app/themes/theme_data_service.dart';
+import 'package:textual_chat_app/services/theme/theme_data_service.dart';
 
 class ThemeProvider extends ChangeNotifier {
   ThemeData _themeData = lightTheme; // Default theme

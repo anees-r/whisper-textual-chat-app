@@ -2,23 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:textual_chat_app/app_assets.dart';
 
-class UserTile extends StatefulWidget {
+class RequestTile extends StatefulWidget {
   final String text;
-  final void Function()? onTap;
-  const UserTile({super.key, required this.text, required this.onTap});
+  const RequestTile({super.key, required this.text,});
 
   @override
-  State<UserTile> createState() => _UserTileState();
+  State<RequestTile> createState() => _RequestTileState();
 }
 
-class _UserTileState extends State<UserTile> {
+class _RequestTileState extends State<RequestTile> {
   
   @override
   Widget build(BuildContext context) {
-    final bool _isDeleted = widget.text == "Deleted Account";
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: Container(
+    return Container(
         padding: const EdgeInsets.all(20),
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
@@ -30,7 +26,7 @@ class _UserTileState extends State<UserTile> {
             // icon
             SvgPicture.asset(
               AppAssets.userIcon,
-              color:_isDeleted ? Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5) : Theme.of(context).colorScheme.secondaryContainer,
+              color:Theme.of(context).colorScheme.secondaryContainer,
             ),
 
             const SizedBox(width: 20,),
@@ -38,14 +34,14 @@ class _UserTileState extends State<UserTile> {
             Text(
               widget.text,
               style: TextStyle(
-                color: _isDeleted ? Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5) : Theme.of(context).colorScheme.secondaryContainer,
+                color:Theme.of(context).colorScheme.secondaryContainer,
                 fontFamily: "Hoves",
                 fontSize: 16,
               ),
             )
           ],
         ),
-      ),
+      
     );
   }
 }
