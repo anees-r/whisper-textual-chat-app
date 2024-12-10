@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:textual_chat_app/models/message_model.dart';
+import 'package:textual_chat_app/services/requests/requests_service.dart';
 
 class ChatService extends ChangeNotifier {
   // get firestore and auth instance
@@ -42,10 +43,14 @@ class ChatService extends ChangeNotifier {
           deletedUsersSnapshot.docs.map((doc) => doc.id).toList();
 
       // get all users
-      final userSnapshot = await _firestore.collection("users").get();
+      final friendSnapshot = await _firestore
+          .collection("users")
+          .doc(currentUser.uid)
+          .collection('friends')
+          .get();
 
       // return as stream list after removing self and blocked users
-      return userSnapshot.docs
+      return friendSnapshot.docs
           .where((doc) =>
               doc.data()["email"] != currentUser.email &&
               !blockedUserIDs.contains(doc.id) &&
@@ -200,6 +205,7 @@ class ChatService extends ChangeNotifier {
 
     _firestore.collection("chat_room").doc(chatRoomId).delete();
     deleteUser(userID);
+    RequestsService().removeFriend(userID);
     notifyListeners();
   }
 
@@ -214,4 +220,5 @@ class ChatService extends ChangeNotifier {
         .set({});
     notifyListeners();
   }
+
 }

@@ -20,7 +20,7 @@ class _UserTileState extends State<UserTile> {
       onTap: widget.onTap,
       child: Container(
         padding: const EdgeInsets.all(20),
-        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.tertiaryContainer,
           borderRadius: BorderRadius.circular(15),

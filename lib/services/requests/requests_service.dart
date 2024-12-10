@@ -30,34 +30,54 @@ class RequestsService extends ChangeNotifier {
     String senderEmail = _auth.currentUser!.email!;
     String receiverID = await getUidByEmail(receiverEmail);
     print("receiver id: $receiverID");
+
     // If the user exists, proceed
     if (receiverID.isNotEmpty) {
-      // Check if a request already exists between the sender and receiver
-      QuerySnapshot existingRequest = await _firestore
-          .collection('users').doc(receiverID).collection('requests')
-          .where('senderID', isEqualTo: senderID)
-          .where('senderEmail', isEqualTo: senderEmail)
+      // check if already friends
+      QuerySnapshot existingFriend = await _firestore
+          .collection('users')
+          .doc(senderID)
+          .collection('friends')
+          .where('uid', isEqualTo: receiverID)
+          .where('email', isEqualTo: receiverEmail)
           .get();
 
-      if (existingRequest.docs.isEmpty) {
-        // No existing request, so create a new one
-        Map<String, dynamic> requestData = {
-          'senderID': senderID,
-          'senderEmail': senderEmail,
-          'timestamp': FieldValue.serverTimestamp(),
-        };
+      if (existingFriend.docs.isEmpty) {
+        // Check if a request already exists between the sender and receiver
+        QuerySnapshot existingRequest = await _firestore
+            .collection('users')
+            .doc(receiverID)
+            .collection('requests')
+            .where('senderID', isEqualTo: senderID)
+            .where('senderEmail', isEqualTo: senderEmail)
+            .get();
 
-        await _firestore.collection('users').doc(receiverID).collection('requests').add(requestData);
-        print("Request sent successfully!");
+        if (existingRequest.docs.isEmpty) {
+          // No existing request, so create a new one
+          Map<String, dynamic> requestData = {
+            'senderID': senderID,
+            'senderEmail': senderEmail,
+            'timestamp': FieldValue.serverTimestamp(),
+          };
+
+          await _firestore
+              .collection('users')
+              .doc(receiverID)
+              .collection('requests')
+              .add(requestData);
+          print("Request sent successfully!");
+        } else {
+          // Request already exists
+          print("Request already exists between $senderID and $receiverID.");
+        }
       } else {
-        // Request already exists
-        print("Request already exists between $senderID and $receiverID.");
+        //friend already exists
+        print("Already friends with $receiverID.");
       }
     }
   }
 
   // get requests
-  
   Stream<List<Map<String, dynamic>>> getRequests(String userID) {
     return _firestore
         .collection("users")
@@ -71,13 +91,103 @@ class RequestsService extends ChangeNotifier {
           .toList();
 
       // Fetch user data for each sender ID
-      final userDocs = await Future.wait(senderIDs
-          .map((id) => _firestore.collection("users").doc(id).get()));
+      final userDocs = await Future.wait(
+          senderIDs.map((id) => _firestore.collection("users").doc(id).get()));
       return userDocs.map((doc) => doc.data() as Map<String, dynamic>).toList();
     });
   }
 
   // accept request
+  Future<void> acceptRequest(String senderID, senderEmail) async {
+    String currentUserID = _auth.currentUser!.uid;
+    String currentUserEmail = _auth.currentUser!.email!;
+
+    // add sender's id and email to current user's friends
+    Map<String, dynamic> friendData1 = {
+      'uid': senderID,
+      'email': senderEmail,
+      'timestamp': FieldValue.serverTimestamp(),
+    };
+
+    await _firestore
+        .collection('users')
+        .doc(currentUserID)
+        .collection('friends')
+        .add(friendData1);
+
+    // add current user's id and email to sender's friends
+    Map<String, dynamic> friendData2 = {
+      'uid': currentUserID,
+      'email': currentUserEmail,
+      'timestamp': FieldValue.serverTimestamp(),
+    };
+
+    await _firestore
+        .collection('users')
+        .doc(senderID)
+        .collection('friends')
+        .add(friendData2);
+
+    // remove friend request from requests collection
+    removeRequest(senderID, senderEmail, currentUserID);
+
+    // notify listeners
+    notifyListeners();
+  }
 
   // reject request
+  Future<void> rejectRequest(String senderID, senderEmail) async {
+    String currentUserID = _auth.currentUser!.uid;
+
+    // remove request from request's collection
+    removeRequest(senderID, senderEmail, currentUserID);
+
+    // notify listeners
+    notifyListeners();
+  }
+
+  // remove request
+  Future<void> removeRequest(
+      String senderID, senderEmail, currentUserID) async {
+    // remove request from request's collection
+    QuerySnapshot fetchedRequest = await _firestore
+        .collection('users')
+        .doc(currentUserID)
+        .collection('requests')
+        .where('senderID', isEqualTo: senderID)
+        .where('senderEmail', isEqualTo: senderEmail)
+        .get();
+
+    // looping and removing request
+    for (var doc in fetchedRequest.docs) {
+      await doc.reference.delete();
+    }
+  }
+
+  // remove friends
+  Future<void> removeFriend(String userID) async {
+    // fetch friend from friends
+    QuerySnapshot friendSnapshot1 = await _firestore
+        .collection('users')
+        .doc(_auth.currentUser!.uid)
+        .collection('friends')
+        .where('uid', isEqualTo: userID)
+        .get();
+    // delete that friend
+    for (var doc in friendSnapshot1.docs){
+      doc.reference.delete();
+    }
+
+    // fetch current user from friends of friend
+    QuerySnapshot friendSnapshot2 = await _firestore
+        .collection('users')
+        .doc(userID)
+        .collection('friends')
+        .where('uid', isEqualTo: _auth.currentUser!.uid)
+        .get();
+    // delete current user from that friend
+    for (var doc in friendSnapshot2.docs){
+      doc.reference.delete();
+    }
+  }
 }

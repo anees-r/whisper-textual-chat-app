@@ -80,7 +80,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
               itemCount: requestUser.length,
               itemBuilder: (context, index) {
                 final user = requestUser[index];
-                return RequestTile(text: user["email"],);
+                return RequestTile(text: user["email"], senderID: user["uid"],);
               },
             );
           },

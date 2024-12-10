@@ -56,9 +56,20 @@ class AuthService {
 
   // delete account
   Future<void> deleteAccount() async {
-    final _chatService = ChatService();
-    _chatService.deleteMessagesFromCurrent();
+    // delete messages all the messages by current user
+    ChatService().deleteMessagesFromCurrent();
+
+    // change email of current user to Deleted account
     _firestore.collection("users").doc(auth.currentUser!.uid).update({'email': 'Deleted Account'});
+
+    // delete all reports about current user
+    QuerySnapshot reportedMessages = await _firestore.collection('reports').where('messageOwner', isEqualTo: auth.currentUser!.uid).get();
+    // loop all reports and delete
+    for(var doc in reportedMessages.docs){
+      doc.reference.delete();
+    }
+
+    // delete current user from authentication
     auth.currentUser!.delete();
   }
 }
