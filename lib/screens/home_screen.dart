@@ -24,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // open send request box
   void openSendRequestBox() {
+    double screenWidth = MediaQuery.of(context).size.width;
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -36,25 +37,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              content: TextField(
-                cursorColor: Theme.of(context).colorScheme.primary,
-                controller: _requestController,
-                style: TextStyle(
-                  fontFamily: "Hoves",
-                  fontSize: 16,
-                  color: Theme.of(context).colorScheme.secondaryContainer,
+              content: Container(
+                width: screenWidth * 0.7,
+                child: TextField(
+                  cursorColor: Theme.of(context).colorScheme.primary,
+                  controller: _requestController,
+                  style: TextStyle(
+                    fontFamily: "Hoves",
+                    fontSize: 16,
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                  ),
+                  decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "Whisperer's Email",
+                      hintStyle: TextStyle(
+                        fontFamily: "Hoves",
+                        fontSize: 16,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .secondaryContainer
+                            .withOpacity(0.4),
+                      )),
                 ),
-                decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: "Whisperer's Email",
-                    hintStyle: TextStyle(
-                      fontFamily: "Hoves",
-                      fontSize: 16,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .secondaryContainer
-                          .withOpacity(0.4),
-                    )),
               ),
               actions: [
                 // cancel button
@@ -74,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // add button
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     // if empty show error
                     if (_requestController.text.isEmpty) {
                       // Show error SnackBar if input is empty
@@ -104,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       return;
                     } else {
                       // send friend request
-                      _requestService.sendRequest(_requestController.text);
+                      String returnedText = await _requestService.sendRequest(_requestController.text) as String;
 
                       // clear the text field
                       _requestController.clear();
@@ -115,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            "Request sent, if Email exists!",
+                            returnedText,
                             style: TextStyle(
                               fontFamily: "Hoves",
                               fontSize: 16,
@@ -258,33 +262,18 @@ class _HomeScreenState extends State<HomeScreen> {
       Map<String, dynamic> userData, BuildContext context) {
     // displaying all user except current user
     if (userData["email"] != widget._authService.getCurrentUser()!.email) {
-      if (userData["email"] == "Deleted Account") {
-        return UserTile(
-            text: userData["email"],
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChatScreen(
-                      receiverEmail: userData["email"],
-                      receiverID: userData["uid"],
-                    ),
-                  )).then((_) => setState(() {}));
-            });
-      } else {
-        return UserTile(
-            text: userData["email"],
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChatScreen(
-                      receiverEmail: userData["email"],
-                      receiverID: userData["uid"],
-                    ),
-                  ));
-            });
-      }
+      return UserTile(
+          text: userData["email"],
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatScreen(
+                    receiverEmail: userData["email"],
+                    receiverID: userData["uid"],
+                  ),
+                ));
+          });
     } else {
       return Container();
     }

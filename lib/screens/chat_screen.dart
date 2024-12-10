@@ -6,6 +6,7 @@ import 'package:textual_chat_app/components/chat_bubble.dart';
 import 'package:textual_chat_app/components/my_textfield.dart';
 import 'package:textual_chat_app/services/auth/auth_service.dart';
 import 'package:textual_chat_app/services/chat/chat_service.dart';
+import 'package:textual_chat_app/services/requests/requests_service.dart';
 
 class ChatScreen extends StatefulWidget {
   final String receiverEmail;
@@ -74,13 +75,12 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   // show delete button
-  Widget _showDeleteButton(bool condition) {
-    if (condition) {
+  Widget _showDeleteButton(bool unfriend, deleted) {
       return Container(
-        margin: EdgeInsets.only(right: 3),
+        margin: const EdgeInsets.only(right: 3),
         child: IconButton(
             onPressed: () {
-              _showDeleteBox(context);
+              _showDeleteBox(context, unfriend, deleted);
             },
             icon: SvgPicture.asset(
               AppAssets.deleteIcon,
@@ -90,12 +90,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   .withOpacity(0.5),
             )),
       );
-    } else {
-      return Container();
-    }
   }
 
-  void _showDeleteBox(BuildContext context) {
+  void _showDeleteBox(BuildContext context, bool unfriend, deleted) {
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -134,7 +131,12 @@ class _ChatScreenState extends State<ChatScreen> {
                     onPressed: () async {
                       Navigator.pop(context);
                       Navigator.pop(context);
-                      ChatService().deleteChatRoom(widget.receiverID);
+                      if(unfriend || deleted){
+                        if(deleted){
+                          ChatService().deleteUser(widget.receiverID);
+                        }
+                        ChatService().deleteChatRoom(widget.receiverID);
+                      }
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
@@ -178,9 +180,257 @@ class _ChatScreenState extends State<ChatScreen> {
             ));
   }
 
+  // show options
+  void showOptions(BuildContext context, String userID) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              // Unfriend button
+              ListTile(
+                onTap: () {
+                  Navigator.pop(context);
+                  _showRemoveFriend(context, userID);
+                },
+                leading: SvgPicture.asset(
+                  AppAssets.reportIcon,
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                ),
+                title: Text(
+                  "Remove Whisperer",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    fontFamily: "Hoves",
+                    fontSize: 16,
+                  ),
+                ),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
+              ),
+
+              // block button
+              ListTile(
+                onTap: () {
+                  Navigator.pop(context);
+                  _blockUser(context, userID);
+                },
+                leading: SvgPicture.asset(
+                  AppAssets.blockIcon,
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                ),
+                title: Text(
+                  "Block",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    fontFamily: "Hoves",
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+
+              // cancel button
+              ListTile(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                leading: SvgPicture.asset(
+                  AppAssets.cancelIcon,
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  height: 21,
+                  width: 21,
+                ),
+                title: Text(
+                  "Cancel",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    fontFamily: "Hoves",
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // remove friend dialogue
+  void _showRemoveFriend(BuildContext context, String userID) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text(
+                "Remove Whisperer",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  fontFamily: "Hoves",
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: Text(
+                "Are you sure you want to remove this whisperer?",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  fontFamily: "Hoves",
+                  fontSize: 16,
+                ),
+              ),
+              actions: [
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.tertiaryContainer,
+                      foregroundColor: Theme.of(context)
+                          .colorScheme
+                          .secondaryContainer, // Background color
+                      shadowColor: Colors.black.withOpacity(0.5),
+                    ),
+                    child: const Text("Cancel")),
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                      RequestsService().removeFriend(userID);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            "Whisperer Removed!",
+                            style: TextStyle(
+                              fontFamily: "Hoves",
+                              fontSize: 16,
+                              color: AppAssets.darkBackgroundColor,
+                            ),
+                          ),
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+
+                          // Margin from the top and sides
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                topRight: Radius.circular(10)),
+                          ),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: AppAssets.darkBackgroundColor,
+                      shadowColor: Colors.black.withOpacity(0.5),
+                    ),
+                    child: const Text("Remove")),
+              ],
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+                side: BorderSide(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .secondaryContainer
+                      .withOpacity(0.1), // Outline color
+                  width: 2.0, // Outline thickness
+                ),
+              ),
+            ));
+  }
+
+  // show block dialogue
+  void _blockUser(BuildContext context, String userID) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text(
+                "Block User",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  fontFamily: "Hoves",
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: Text(
+                "Are you sure you want to block this user?",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  fontFamily: "Hoves",
+                  fontSize: 16,
+                ),
+              ),
+              actions: [
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.tertiaryContainer,
+                      foregroundColor: Theme.of(context)
+                          .colorScheme
+                          .secondaryContainer, // Background color
+                      shadowColor: Colors.black.withOpacity(0.5),
+                    ),
+                    child: const Text("Cancel")),
+                ElevatedButton(
+                    onPressed: () {
+                      // pop dialogue
+                      Navigator.pop(context);
+                      // pop chat screen
+                      Navigator.pop(context);
+                      ChatService().blockUser(userID);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            "Whisperer blocked!",
+                            style: TextStyle(
+                              fontFamily: "Hoves",
+                              fontSize: 16,
+                              color: AppAssets.darkBackgroundColor,
+                            ),
+                          ),
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+
+                          // Margin from the top and sides
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                topRight: Radius.circular(10)),
+                          ),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: AppAssets.darkBackgroundColor,
+                      shadowColor: Colors.black.withOpacity(0.5),
+                    ),
+                    child: const Text("Block")),
+              ],
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+                side: BorderSide(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .secondaryContainer
+                      .withOpacity(0.1), // Outline color
+                  width: 2.0, // Outline thickness
+                ),
+              ),
+            ));
+  }
+
   @override
   Widget build(BuildContext context) {
-    bool _showDelete = widget.receiverEmail == "Deleted Account";
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
@@ -191,16 +441,21 @@ class _ChatScreenState extends State<ChatScreen> {
             Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
         leading: IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: Icon(Icons.arrow_back_ios_rounded)),
-        title: Text(
-          widget.receiverEmail,
-          style: const TextStyle(
-            fontFamily: "Hoves",
-            fontSize: 20,
+            icon: const Icon(Icons.arrow_back_ios_rounded)),
+        title: GestureDetector(
+          onLongPress: () {
+            showOptions(context, widget.receiverID);
+          },
+          child: Text(
+            widget.receiverEmail,
+            style: const TextStyle(
+              fontFamily: "Hoves",
+              fontSize: 20,
+            ),
           ),
         ),
         actions: [
-          _showDeleteButton(_showDelete),
+          _checkRemovedAndDisplayDelete(),
         ],
         centerTitle: true,
       ),
@@ -210,15 +465,72 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: _buildMessageList(),
           ),
-
           // send message textfield and icon
-          _buildMessageInput(),
+          // _showRemoved(),
+          // _buildMessageInput(),
+          _checkAndDisplayFooter(),
         ],
       ),
     );
   }
 
   // extracted methods
+  
+  // display delete icon based on email or friend status
+    Widget _checkRemovedAndDisplayDelete(){
+    bool showDelete = widget.receiverEmail == "Deleted Account";
+    return FutureBuilder(
+      future: ChatService().checkRemovedAndBlocked(widget.receiverID), 
+      builder: (context, snapshot) {
+        String? conditon = snapshot.data;
+        if (snapshot.connectionState == ConnectionState.waiting) {
+            return Container(
+              margin: EdgeInsets.only(right:20),
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                color: Theme.of(context).colorScheme.secondaryContainer,
+              ),
+            );
+          }
+        bool unfriended = conditon! == "Removed";
+        if ( unfriended || showDelete){
+         return _showDeleteButton(unfriended, showDelete);
+        }else{
+          return Container();
+        }
+
+      }
+      );
+  }
+
+  // display info or the textfield in footer based on friend status
+  Widget _checkAndDisplayFooter(){
+    return FutureBuilder(
+      future: ChatService().checkRemovedAndBlocked(widget.receiverID), 
+      builder: (context, snapshot) {
+        String? conditon = snapshot.data;
+        if (snapshot.connectionState == ConnectionState.waiting) {
+            return Container(
+              margin: EdgeInsets.only(bottom:30),
+              child: CircularProgressIndicator(
+                color: Theme.of(context).colorScheme.secondaryContainer,
+              ),
+            );
+          }
+        
+        if (conditon == "Removed"){
+         return _showRemoved();
+        }
+        if (conditon! == "Blocked"){
+         return _showBlocked();
+        }else{
+          return _buildMessageInput();
+        }
+
+      }
+      );
+  }
 
   Widget _buildMessageList() {
     String senderId = widget._authService.getCurrentUser()!.uid;
@@ -296,6 +608,72 @@ class _ChatScreenState extends State<ChatScreen> {
         ));
   }
 
+  Widget _showRemoved() {
+    return Container(
+      margin: EdgeInsets.all(25),
+      child: Center(
+          child: Column(
+        children: [
+          Text(
+            "The other whisperer removed you as friend!",
+            style: TextStyle(
+              color: Theme.of(context)
+                  .colorScheme
+                  .secondaryContainer
+                  .withOpacity(0.5),
+              fontFamily: "Hoves",
+              fontSize: 14,
+            ),
+          ),
+          Text(
+            "Delete chat or add them again.",
+            style: TextStyle(
+              color: Theme.of(context)
+                  .colorScheme
+                  .secondaryContainer
+                  .withOpacity(0.3),
+              fontFamily: "Hoves",
+              fontSize: 14,
+            ),
+          ),
+        ],
+      )),
+    );
+  }
+
+    Widget _showBlocked() {
+    return Container(
+      margin: EdgeInsets.all(25),
+      child: Center(
+          child: Column(
+        children: [
+          Text(
+            "The other whisperer has blocked you!",
+            style: TextStyle(
+              color: Theme.of(context)
+                  .colorScheme
+                  .secondaryContainer
+                  .withOpacity(0.5),
+              fontFamily: "Hoves",
+              fontSize: 14,
+            ),
+          ),
+          Text(
+            "Block them or ignore.",
+            style: TextStyle(
+              color: Theme.of(context)
+                  .colorScheme
+                  .secondaryContainer
+                  .withOpacity(0.3),
+              fontFamily: "Hoves",
+              fontSize: 14,
+            ),
+          ),
+        ],
+      )),
+    );
+  }
+
   Widget _buildMessageInput() {
     return Container(
       margin: const EdgeInsets.only(bottom: 25, top: 15),
@@ -303,7 +681,7 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Expanded(
               child: MyTextfield(
-            hintText: "Type a message",
+            hintText: "Whisper here",
             obsecureText: false,
             controller: widget._messageController,
             focusNode: myFocusNode,

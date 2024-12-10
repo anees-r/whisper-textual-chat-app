@@ -21,70 +21,68 @@ class _MyDrawerState extends State<MyDrawer> {
   }
 
   void _showLogoutBox() {
-      final _authService = AuthService();
-      showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-                title: const Text(
-                  "Logout",
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontFamily: "Hoves",
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text(
+                "Logout",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontFamily: "Hoves",
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
-                content: Text(
-                  "Are you sure you want to logout?",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.secondaryContainer,
-                    fontFamily: "Hoves",
-                    fontSize: 16,
-                  ),
+              ),
+              content: Text(
+                "Are you sure you want to logout?",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  fontFamily: "Hoves",
+                  fontSize: 16,
                 ),
-                actions: [
-                  // cancel button
-                  ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.tertiaryContainer,
-                        foregroundColor: Theme.of(context)
-                            .colorScheme
-                            .secondaryContainer, // Background color
-                        shadowColor: Colors.black.withOpacity(0.5),
-                      ),
-                      child: const Text("Cancel")),
+              ),
+              actions: [
+                // cancel button
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.tertiaryContainer,
+                      foregroundColor: Theme.of(context)
+                          .colorScheme
+                          .secondaryContainer, // Background color
+                      shadowColor: Colors.black.withOpacity(0.5),
+                    ),
+                    child: const Text("Cancel")),
 
-                  // log out button
-                  ElevatedButton(
-                      onPressed: () async {
-                        Navigator.pop(context);
-                        _logout();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: AppAssets.lightBackgroundColor,
-                        shadowColor: Colors.black.withOpacity(0.5),
-                      ),
-                      child: const Text("Logout")),
-                ],
-                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  side: BorderSide(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .secondaryContainer
-                        .withOpacity(0.1), // Outline color
-                    width: 2.0, // Outline thickness
-                  ),
+                // log out button
+                ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      _logout();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: AppAssets.darkBackgroundColor,
+                      shadowColor: Colors.black.withOpacity(0.5),
+                    ),
+                    child: const Text("Logout")),
+              ],
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+                side: BorderSide(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .secondaryContainer
+                      .withOpacity(0.1), // Outline color
+                  width: 2.0, // Outline thickness
                 ),
-              ));
-    }
-  
+              ),
+            ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,9 +150,10 @@ class _MyDrawerState extends State<MyDrawer> {
                   onTap: () {
                     // navigate to settings screen
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const RequestsScreen()));
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const RequestsScreen()))
+                        .then((_) => setState(() {}));
                   },
                 ),
               ),
@@ -192,10 +191,10 @@ class _MyDrawerState extends State<MyDrawer> {
           Padding(
             padding: const EdgeInsets.only(left: 25, bottom: 25),
             child: ListTile(
-              title: const Text(
+              title: Text(
                 "L O G O U T",
                 style: TextStyle(
-                  color: Colors.red,
+                  color: Theme.of(context).colorScheme.primary,
                   fontFamily: "Hoves",
                   fontSize: 20,
                   //fontWeight: FontWeight.bold,
@@ -203,7 +202,7 @@ class _MyDrawerState extends State<MyDrawer> {
               ),
               leading: SvgPicture.asset(
                 AppAssets.logoutIcon,
-                color: Colors.red,
+                color: Theme.of(context).colorScheme.primary,
               ),
               onTap: () {
                 _showLogoutBox();

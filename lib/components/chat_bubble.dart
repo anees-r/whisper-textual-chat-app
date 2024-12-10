@@ -50,26 +50,6 @@ class _ChatBubbleState extends State<ChatBubble> {
                     borderRadius: BorderRadius.circular(30)),
               ),
 
-              // block button
-              ListTile(
-                onTap: () {
-                  Navigator.pop(context);
-                  _blockUser(context, userID);
-                },
-                leading: SvgPicture.asset(
-                  AppAssets.blockIcon,
-                  color: Theme.of(context).colorScheme.secondaryContainer,
-                ),
-                title: Text(
-                  "Block",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.secondaryContainer,
-                    fontFamily: "Hoves",
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-
               // cancel button
               ListTile(
                 onTap: () {
@@ -181,93 +161,7 @@ class _ChatBubbleState extends State<ChatBubble> {
             ));
   }
 
-  // block
-  void _blockUser(BuildContext context, String userID) {
-    showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: Text(
-                "Block User",
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.secondaryContainer,
-                  fontFamily: "Hoves",
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              content: Text(
-                "Are you sure you want to block this user?",
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.secondaryContainer,
-                  fontFamily: "Hoves",
-                  fontSize: 16,
-                ),
-              ),
-              actions: [
-                ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          Theme.of(context).colorScheme.tertiaryContainer,
-                      foregroundColor: Theme.of(context)
-                          .colorScheme
-                          .secondaryContainer, // Background color
-                      shadowColor: Colors.black.withOpacity(0.5),
-                    ),
-                    child: const Text("Cancel")),
-                ElevatedButton(
-                    onPressed: () {
-                      // pop dialogue
-                      Navigator.pop(context);
-                      // pop chat screen
-                      Navigator.pop(context);
-                      ChatService().blockUser(userID);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            "User blocked!",
-                            style: TextStyle(
-                              fontFamily: "Hoves",
-                              fontSize: 16,
-                              color: AppAssets.darkBackgroundColor,
-                            ),
-                          ),
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primary,
-
-                          // Margin from the top and sides
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                topRight: Radius.circular(10)),
-                          ),
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: AppAssets.darkBackgroundColor,
-                      shadowColor: Colors.black.withOpacity(0.5),
-                    ),
-                    child: const Text("Block")),
-              ],
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-                side: BorderSide(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .secondaryContainer
-                      .withOpacity(0.1), // Outline color
-                  width: 2.0, // Outline thickness
-                ),
-              ),
-            ));
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

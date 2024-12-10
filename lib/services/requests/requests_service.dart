@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:textual_chat_app/services/chat/chat_service.dart';
 
 class RequestsService extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -25,7 +26,7 @@ class RequestsService extends ChangeNotifier {
   }
 
   // send request
-  Future<void> sendRequest(String receiverEmail) async {
+  Future<String> sendRequest(String receiverEmail) async {
     String senderID = _auth.currentUser!.uid;
     String senderEmail = _auth.currentUser!.email!;
     String receiverID = await getUidByEmail(receiverEmail);
@@ -65,16 +66,17 @@ class RequestsService extends ChangeNotifier {
               .doc(receiverID)
               .collection('requests')
               .add(requestData);
-          print("Request sent successfully!");
+          return "Request sent successfully!";
         } else {
           // Request already exists
-          print("Request already exists between $senderID and $receiverID.");
+          return "Request already exists!";
         }
       } else {
         //friend already exists
-        print("Already friends with $receiverID.");
+        return "Already friends with this whisperer!";
       }
     }
+    return "Could not send request!";
   }
 
   // get requests
@@ -113,7 +115,8 @@ class RequestsService extends ChangeNotifier {
         .collection('users')
         .doc(currentUserID)
         .collection('friends')
-        .add(friendData1);
+        .doc(senderID)
+        .set(friendData1);
 
     // add current user's id and email to sender's friends
     Map<String, dynamic> friendData2 = {
@@ -126,10 +129,14 @@ class RequestsService extends ChangeNotifier {
         .collection('users')
         .doc(senderID)
         .collection('friends')
-        .add(friendData2);
+        .doc(currentUserID)
+        .set(friendData2);
 
     // remove friend request from requests collection
     removeRequest(senderID, senderEmail, currentUserID);
+
+    // create chatroom between request sender and current user
+    ChatService().createChatRoom(senderID);
 
     // notify listeners
     notifyListeners();
@@ -174,20 +181,19 @@ class RequestsService extends ChangeNotifier {
         .where('uid', isEqualTo: userID)
         .get();
     // delete that friend
-    for (var doc in friendSnapshot1.docs){
+    for (var doc in friendSnapshot1.docs) {
       doc.reference.delete();
     }
 
-    // fetch current user from friends of friend
-    QuerySnapshot friendSnapshot2 = await _firestore
-        .collection('users')
-        .doc(userID)
-        .collection('friends')
-        .where('uid', isEqualTo: _auth.currentUser!.uid)
-        .get();
-    // delete current user from that friend
-    for (var doc in friendSnapshot2.docs){
-      doc.reference.delete();
-    }
+    // create chatroom id
+    List<String> ids = [userID, _auth.currentUser!.uid];
+    ids.sort();
+    String chatRoomId = ids.join("_");
+
+    // update chatroom status
+    await _firestore
+        .collection('chat_room')
+        .doc(chatRoomId)
+        .update({'removed': true});
   }
 }
