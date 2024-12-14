@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:textual_chat_app/app_assets.dart';
+import 'package:textual_chat_app/components/my_snackbar.dart';
 import 'package:textual_chat_app/screens/blocked_users_screen.dart';
 import 'package:textual_chat_app/services/auth/auth_service.dart';
 import 'package:textual_chat_app/themes/theme_provider.dart';
@@ -54,29 +55,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onPressed: () async {
                       Navigator.pop(context);
                       _authService.deleteAccount();
-                      
-                      
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            "Account Deleted!",
-                            style: TextStyle(
-                              fontFamily: "Hoves",
-                              fontSize: 16,
-                              color: AppAssets.lightBackgroundColor,
-                            ),
-                          ),
-                          backgroundColor: Colors.red,
-
-                          // Margin from the top and sides
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                topRight: Radius.circular(10)),
-                          ),
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
+                      mySnackbar(context, "Account Deleted!", Colors.red);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -88,20 +67,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
-                side: BorderSide(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .secondaryContainer
-                      .withOpacity(0.1), // Outline color
-                  width: 2.0, // Outline thickness
-                ),
               ),
             ));
   }
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       appBar: AppBar(

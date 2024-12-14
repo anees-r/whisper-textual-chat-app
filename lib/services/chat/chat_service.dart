@@ -284,6 +284,21 @@ class ChatService extends ChangeNotifier {
     }
   }
 
+  // delte all messages from a chatroom
+  Future<void> deleteAllMessages(String chatRoomId) async {
+  final messagesCollection = _firestore
+      .collection("chat_room")
+      .doc(chatRoomId)
+      .collection("messages");
+
+  // Get all documents in the 'messages' collection
+  final messagesSnapshot = await messagesCollection.get();
+
+  // Delete each document
+  for (var doc in messagesSnapshot.docs) {
+    await doc.reference.delete();
+  }
+}
   // delete chat room if the other user is deleted
   Future<void> deleteChatRoom(String userID) async {
     // create chatroom id
@@ -291,6 +306,10 @@ class ChatService extends ChangeNotifier {
     ids.sort();
     String chatRoomId = ids.join("_");
 
+    // delete messages from this chatroom
+    deleteAllMessages(chatRoomId);
+
+    // delete chat room
     await _firestore.collection("chat_room").doc(chatRoomId).delete();
     RequestsService().removeFriend(userID);
     notifyListeners();

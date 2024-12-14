@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:textual_chat_app/app_assets.dart';
+import 'package:textual_chat_app/components/my_snackbar.dart';
 import 'package:textual_chat_app/components/user_tile.dart';
 import 'package:textual_chat_app/services/auth/auth_service.dart';
 import 'package:textual_chat_app/services/chat/chat_service.dart';
@@ -56,28 +58,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                     onPressed: () {
                       Navigator.pop(context);
                       ChatService().unblockUser(userID);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            "User unblocked!",
-                            style: TextStyle(
-                              fontFamily: "Hoves",
-                              fontSize: 16,
-                              color: AppAssets.darkBackgroundColor,
-                            ),
-                          ),
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primary,
-
-                          // Margin from the top and sides
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                topRight: Radius.circular(10)),
-                          ),
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
+                      mySnackbar(context, "Whisperer Unblocked!", Theme.of(context).colorScheme.primary);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -143,9 +124,11 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
             // loading
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
-                child: CircularProgressIndicator(
-                  color: Theme.of(context).colorScheme.secondaryContainer,
-                ),
+                child: SvgPicture.asset(
+                AppAssets.loadingAnimation,
+                color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
+                height: 40,
+                width: 40,)
               );
             }
 

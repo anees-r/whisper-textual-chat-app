@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:textual_chat_app/app_assets.dart';
 import 'package:textual_chat_app/components/chat_bubble.dart';
+import 'package:textual_chat_app/components/my_snackbar.dart';
 import 'package:textual_chat_app/components/my_textfield.dart';
 import 'package:textual_chat_app/services/auth/auth_service.dart';
 import 'package:textual_chat_app/services/chat/chat_service.dart';
@@ -76,20 +77,20 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // show delete button
   Widget _showDeleteButton(bool unfriend, deleted) {
-      return Container(
-        margin: const EdgeInsets.only(right: 3),
-        child: IconButton(
-            onPressed: () {
-              _showDeleteBox(context, unfriend, deleted);
-            },
-            icon: SvgPicture.asset(
-              AppAssets.deleteIcon,
-              color: Theme.of(context)
-                  .colorScheme
-                  .secondaryContainer
-                  .withOpacity(0.5),
-            )),
-      );
+    return Container(
+      margin: const EdgeInsets.only(right: 3),
+      child: IconButton(
+          onPressed: () {
+            _showDeleteBox(context, unfriend, deleted);
+          },
+          icon: SvgPicture.asset(
+            AppAssets.deleteIcon,
+            color: Theme.of(context)
+                .colorScheme
+                .secondaryContainer
+                .withOpacity(0.5),
+          )),
+    );
   }
 
   void _showDeleteBox(BuildContext context, bool unfriend, deleted) {
@@ -131,33 +132,14 @@ class _ChatScreenState extends State<ChatScreen> {
                     onPressed: () async {
                       Navigator.pop(context);
                       Navigator.pop(context);
-                      if(unfriend || deleted){
-                        if(deleted){
+                      if (unfriend || deleted) {
+                        if (deleted) {
                           ChatService().deleteUser(widget.receiverID);
                         }
                         ChatService().deleteChatRoom(widget.receiverID);
                       }
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            "Whispers Deleted!",
-                            style: TextStyle(
-                              fontFamily: "Hoves",
-                              fontSize: 16,
-                              color: AppAssets.lightBackgroundColor,
-                            ),
-                          ),
-                          backgroundColor: Colors.red,
-
-                          // Margin from the top and sides
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                topRight: Radius.circular(10)),
-                          ),
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
+                      mySnackbar(context, "Whispers Deleted!",
+                          Theme.of(context).colorScheme.primary);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -169,13 +151,6 @@ class _ChatScreenState extends State<ChatScreen> {
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
-                side: BorderSide(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .secondaryContainer
-                      .withOpacity(0.1), // Outline color
-                  width: 2.0, // Outline thickness
-                ),
               ),
             ));
   }
@@ -195,7 +170,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   _showRemoveFriend(context, userID);
                 },
                 leading: SvgPicture.asset(
-                  AppAssets.reportIcon,
+                  AppAssets.removeIcon,
+                  height: 18,
+                  width: 18,
                   color: Theme.of(context).colorScheme.secondaryContainer,
                 ),
                 title: Text(
@@ -221,7 +198,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   color: Theme.of(context).colorScheme.secondaryContainer,
                 ),
                 title: Text(
-                  "Block",
+                  "Block Whisperer",
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.secondaryContainer,
                     fontFamily: "Hoves",
@@ -298,28 +275,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       Navigator.pop(context);
                       Navigator.pop(context);
                       RequestsService().removeFriend(userID);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            "Whisperer Removed!",
-                            style: TextStyle(
-                              fontFamily: "Hoves",
-                              fontSize: 16,
-                              color: AppAssets.darkBackgroundColor,
-                            ),
-                          ),
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primary,
-
-                          // Margin from the top and sides
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                topRight: Radius.circular(10)),
-                          ),
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
+                      mySnackbar(context, "Whisperer Removed!",
+                          Theme.of(context).colorScheme.primary);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -331,13 +288,6 @@ class _ChatScreenState extends State<ChatScreen> {
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
-                side: BorderSide(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .secondaryContainer
-                      .withOpacity(0.1), // Outline color
-                  width: 2.0, // Outline thickness
-                ),
               ),
             ));
   }
@@ -348,7 +298,7 @@ class _ChatScreenState extends State<ChatScreen> {
         context: context,
         builder: (context) => AlertDialog(
               title: Text(
-                "Block User",
+                "Block Whisperer",
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.secondaryContainer,
                   fontFamily: "Hoves",
@@ -385,28 +335,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       // pop chat screen
                       Navigator.pop(context);
                       ChatService().blockUser(userID);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            "Whisperer blocked!",
-                            style: TextStyle(
-                              fontFamily: "Hoves",
-                              fontSize: 16,
-                              color: AppAssets.darkBackgroundColor,
-                            ),
-                          ),
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primary,
-
-                          // Margin from the top and sides
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                topRight: Radius.circular(10)),
-                          ),
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
+                      mySnackbar(context, "Whisperer blocked!",
+                          Theme.of(context).colorScheme.primary);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -418,20 +348,12 @@ class _ChatScreenState extends State<ChatScreen> {
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
-                side: BorderSide(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .secondaryContainer
-                      .withOpacity(0.1), // Outline color
-                  width: 2.0, // Outline thickness
-                ),
               ),
             ));
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       appBar: AppBar(
@@ -475,61 +397,54 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   // extracted methods
-  
+
   // display delete icon based on email or friend status
-    Widget _checkRemovedAndDisplayDelete(){
+  Widget _checkRemovedAndDisplayDelete() {
     bool showDelete = widget.receiverEmail == "Deleted Account";
     return FutureBuilder(
-      future: ChatService().checkRemovedAndBlocked(widget.receiverID), 
-      builder: (context, snapshot) {
-        String? conditon = snapshot.data;
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        future: ChatService().checkRemovedAndBlocked(widget.receiverID),
+        builder: (context, snapshot) {
+          String? conditon = snapshot.data;
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return Container(
-              margin: EdgeInsets.only(right:20),
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(
-                color: Theme.of(context).colorScheme.secondaryContainer,
-              ),
             );
           }
-        bool unfriended = conditon! == "Removed";
-        if ( unfriended || showDelete){
-         return _showDeleteButton(unfriended, showDelete);
-        }else{
-          return Container();
-        }
-
-      }
-      );
+          bool unfriended = conditon! == "Removed";
+          if (unfriended || showDelete) {
+            return _showDeleteButton(unfriended, showDelete);
+          } else {
+            return Container();
+          }
+        });
   }
 
   // display info or the textfield in footer based on friend status
-  Widget _checkAndDisplayFooter(){
+  Widget _checkAndDisplayFooter() {
     return FutureBuilder(
-      future: ChatService().checkRemovedAndBlocked(widget.receiverID), 
-      builder: (context, snapshot) {
-        String? conditon = snapshot.data;
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        future: ChatService().checkRemovedAndBlocked(widget.receiverID),
+        builder: (context, snapshot) {
+          String? conditon = snapshot.data;
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return Container(
-              margin: EdgeInsets.only(bottom:30),
-              child: CircularProgressIndicator(
-                color: Theme.of(context).colorScheme.secondaryContainer,
-              ),
+              margin: const EdgeInsets.only(bottom: 30),
+              child: SvgPicture.asset(
+                AppAssets.loadingAnimation,
+                color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
+                height: 38,
+                width: 38,)
             );
           }
-        
-        if (conditon == "Removed"){
-         return _showRemoved();
-        }
-        if (conditon! == "Blocked"){
-         return _showBlocked();
-        }else{
-          return _buildMessageInput();
-        }
 
-      }
-      );
+          if (conditon == "Removed" || conditon! == "Blocked") {
+            if (conditon == "Removed") {
+              return _showRemoved();
+            } else {
+              return _showBlocked();
+            }
+          } else {
+            return _buildMessageInput();
+          }
+        });
   }
 
   Widget _buildMessageList() {
@@ -554,9 +469,11 @@ class _ChatScreenState extends State<ChatScreen> {
           // loading
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
-              child: CircularProgressIndicator(
-                color: Theme.of(context).colorScheme.secondaryContainer,
-              ),
+              child: SvgPicture.asset(
+                AppAssets.loadingAnimation,
+                color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
+                height: 40,
+                width: 40,)
             );
           }
 
@@ -641,9 +558,9 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-    Widget _showBlocked() {
+  Widget _showBlocked() {
     return Container(
-      margin: EdgeInsets.all(25),
+      margin: const EdgeInsets.all(25),
       child: Center(
           child: Column(
         children: [
@@ -677,30 +594,60 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _buildMessageInput() {
     return Container(
       margin: const EdgeInsets.only(bottom: 25, top: 15),
-      child: Row(
-        children: [
-          Expanded(
-              child: MyTextfield(
-            hintText: "Whisper here",
-            obsecureText: false,
-            controller: widget._messageController,
-            focusNode: myFocusNode,
-          )),
+      child: 
           Container(
-            margin: const EdgeInsets.only(right: 25),
+            margin: EdgeInsets.symmetric(horizontal: 25),
+            padding: EdgeInsets.only(top: 4,bottom: 4, left: 20, right: 8),
             decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                borderRadius: BorderRadius.circular(50)),
-            child: IconButton(
-              onPressed: sendMessage,
-              icon: SvgPicture.asset(
-                AppAssets.sendIcon,
-                color: AppAssets.darkBackgroundColor,
+                color: Theme.of(context).colorScheme.tertiaryContainer,
+                border: Border.all(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .secondaryContainer
+                        .withOpacity(0.2),
+                    width: 1),
+                borderRadius: BorderRadius.circular(500)),
+            child: TextFormField(
+              focusNode: myFocusNode,
+              controller: widget._messageController,
+              obscureText: false,
+              cursorColor: Theme.of(context).colorScheme.primary,
+              style: TextStyle(
+                fontFamily: "Hoves",
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.secondaryContainer,
               ),
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.symmetric(vertical: 15),
+                suffixIcon: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(100)
+                  ),
+                  child: IconButton(
+                    onPressed: sendMessage,
+                    icon: SvgPicture.asset(
+                      AppAssets.sendIcon,
+                      color: AppAssets.darkBackgroundColor,
+                    ),
+                  
+                                ),
+                ),
+                border: InputBorder.none,
+                  hintText: "Whisper here",
+                  hintStyle: TextStyle(
+                    fontFamily: "Hoves",
+                    fontSize: 16,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .secondaryContainer
+                        .withOpacity(0.4),
+                  )),
+                  
             ),
-          )
-        ],
-      ),
+          ),
+          
+      
     );
   }
 }

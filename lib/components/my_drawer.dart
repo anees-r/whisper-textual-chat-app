@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:textual_chat_app/app_assets.dart';
+import 'package:textual_chat_app/components/my_snackbar.dart';
 import 'package:textual_chat_app/screens/requests_screen.dart';
 import 'package:textual_chat_app/services/auth/auth_service.dart';
 import 'package:textual_chat_app/screens/settings_screen.dart';
@@ -27,7 +28,7 @@ class _MyDrawerState extends State<MyDrawer> {
               title: Text(
                 "Logout",
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme.of(context).colorScheme.secondaryContainer,
                   fontFamily: "Hoves",
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -62,6 +63,8 @@ class _MyDrawerState extends State<MyDrawer> {
                     onPressed: () async {
                       Navigator.pop(context);
                       _logout();
+                      mySnackbar(context, "Logout Successful!",
+                          Theme.of(context).colorScheme.primary);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -73,13 +76,6 @@ class _MyDrawerState extends State<MyDrawer> {
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
-                side: BorderSide(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .secondaryContainer
-                      .withOpacity(0.1), // Outline color
-                  width: 2.0, // Outline thickness
-                ),
               ),
             ));
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:textual_chat_app/app_assets.dart';
 import 'package:textual_chat_app/components/my_drawer.dart';
+import 'package:textual_chat_app/components/my_snackbar.dart';
 import 'package:textual_chat_app/components/user_tile.dart';
 import 'package:textual_chat_app/screens/chat_screen.dart';
 import 'package:textual_chat_app/services/auth/auth_service.dart';
@@ -108,7 +110,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       return;
                     } else {
                       // send friend request
-                      String returnedText = await _requestService.sendRequest(_requestController.text) as String;
+                      String returnedText = await _requestService
+                          .sendRequest(_requestController.text);
 
                       // clear the text field
                       _requestController.clear();
@@ -116,28 +119,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       // close request box
                       Navigator.pop(context);
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            returnedText,
-                            style: TextStyle(
-                              fontFamily: "Hoves",
-                              fontSize: 16,
-                              color: AppAssets.darkBackgroundColor,
-                            ),
-                          ),
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primary,
-
-                          // Margin from the top and sides
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                topRight: Radius.circular(10)),
-                          ),
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
+                      mySnackbar(context, returnedText,
+                          Theme.of(context).colorScheme.primary);
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -152,13 +135,6 @@ class _HomeScreenState extends State<HomeScreen> {
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
-                side: BorderSide(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .secondaryContainer
-                      .withOpacity(0.1), // Outline color
-                  width: 2.0, // Outline thickness
-                ),
               ),
             ));
   }
@@ -242,9 +218,11 @@ class _HomeScreenState extends State<HomeScreen> {
           // loading
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
-              child: CircularProgressIndicator(
-                color: Theme.of(context).colorScheme.secondaryContainer,
-              ),
+              child: SvgPicture.asset(
+                AppAssets.loadingAnimation,
+                color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
+                height: 40,
+                width: 40,)
             );
           }
 

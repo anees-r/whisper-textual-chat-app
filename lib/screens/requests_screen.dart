@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:textual_chat_app/app_assets.dart';
 import 'package:textual_chat_app/components/request_tile.dart';
 import 'package:textual_chat_app/services/requests/requests_service.dart';
 
@@ -54,9 +56,11 @@ class _RequestsScreenState extends State<RequestsScreen> {
             // loading
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
-                child: CircularProgressIndicator(
-                  color: Theme.of(context).colorScheme.secondaryContainer,
-                ),
+                child: SvgPicture.asset(
+                AppAssets.loadingAnimation,
+                color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
+                height: 40,
+                width: 40,)
               );
             }
 

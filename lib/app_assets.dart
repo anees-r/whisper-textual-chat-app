@@ -33,9 +33,14 @@ class AppAssets {
   static String userIcon = "assets/icons/user.svg";
   static String deleteIcon = "assets/icons/delete.svg";
   static String requestsIcon = "assets/icons/request.svg";
+  static String removeIcon = "assets/icons/remove.svg";
 
   // logo
 
   static String mainLogo = "assets/logo/main-logo.svg";
+
+  // animations
+
+  static String loadingAnimation= "assets/animations/loading.svg";
 
 }
