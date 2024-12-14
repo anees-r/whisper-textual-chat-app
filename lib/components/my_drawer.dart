@@ -5,6 +5,7 @@ import 'package:textual_chat_app/components/my_snackbar.dart';
 import 'package:textual_chat_app/screens/requests_screen.dart';
 import 'package:textual_chat_app/services/auth/auth_service.dart';
 import 'package:textual_chat_app/screens/settings_screen.dart';
+import 'package:textual_chat_app/services/requests/requests_service.dart';
 
 class MyDrawer extends StatefulWidget {
   const MyDrawer({super.key});
@@ -143,6 +144,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     AppAssets.requestsIcon,
                     color: Theme.of(context).colorScheme.secondaryContainer,
                   ),
+                  trailing: buildRequestsCount(),
                   onTap: () {
                     // navigate to settings screen
                     Navigator.push(
@@ -208,5 +210,37 @@ class _MyDrawerState extends State<MyDrawer> {
         ],
       ),
     );
+  }
+
+  // get requests count
+  Widget buildRequestsCount() {
+    return StreamBuilder<int>(
+        stream: RequestsService().getRequestsCount(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return SizedBox(width: 0, height: 0,);
+          }
+
+          final unreadCount = snapshot.data ?? 0;
+
+          if (unreadCount > 0) {
+            return Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                unreadCount.toString(),
+                style: TextStyle(
+                  color: AppAssets.darkBackgroundColor,
+                  fontSize: 16,
+                  fontFamily: "Hoves",
+                ),
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        });
   }
 }

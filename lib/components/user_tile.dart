@@ -41,7 +41,7 @@ class _UserTileState extends State<UserTile> {
                           .withOpacity(0.5)
                       : Theme.of(context).colorScheme.secondaryContainer,
                 ),
-            
+
                 const SizedBox(
                   width: 20,
                 ),
@@ -59,7 +59,6 @@ class _UserTileState extends State<UserTile> {
                     fontSize: 16,
                   ),
                 ),
-                
               ],
             ),
             buildUnreadCounter(),
@@ -74,7 +73,7 @@ class _UserTileState extends State<UserTile> {
       future: RequestsService().getUidByEmail(widget.text),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container();
+          return SizedBox(height: 0, width: 0,);
         }
 
         String otherUserID = snapshot.data as String;
@@ -83,14 +82,14 @@ class _UserTileState extends State<UserTile> {
           stream: ChatService().getUnreadMessageCount(otherUserID),
           builder: (context, streamSnapshot) {
             if (streamSnapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator(strokeWidth: 2);
+              return SizedBox(height: 0, width: 0,);
             }
 
             final unreadCount = streamSnapshot.data ?? 0;
 
             if (unreadCount > 0) {
               return Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primary,
                   shape: BoxShape.circle,

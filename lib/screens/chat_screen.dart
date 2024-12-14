@@ -408,7 +408,7 @@ class _ChatScreenState extends State<ChatScreen> {
         builder: (context, snapshot) {
           String? conditon = snapshot.data;
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Container();
+            return SizedBox(height: 0,width: 0,);
           }
           bool unfriended = conditon! == "Removed";
           if (unfriended || showDelete) {

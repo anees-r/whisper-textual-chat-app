@@ -196,4 +196,16 @@ class RequestsService extends ChangeNotifier {
         .doc(chatRoomId)
         .update({'removed': true});
   }
+
+  // get requests count
+  Stream<int> getRequestsCount() {
+    String currentUserID = _auth.currentUser!.uid;
+
+    return _firestore
+        .collection('users')
+        .doc(currentUserID)
+        .collection('requests')
+        .snapshots()
+        .map((snapshot) => snapshot.size);
+  }
 }
