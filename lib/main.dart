@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
+import 'package:textual_chat_app/screens/loading_screen.dart';
 import 'package:textual_chat_app/services/auth/auth_gate.dart';
 import 'package:textual_chat_app/firebase_options.dart';
 import 'package:textual_chat_app/themes/theme_provider.dart';
@@ -39,7 +40,7 @@ class MyApp extends StatelessWidget {
 
       theme: Provider.of<ThemeProvider>(context).themeData,
 
-      home: const AuthGate(),
+      home: const LoadingScreen(),
     );
   }
 }
