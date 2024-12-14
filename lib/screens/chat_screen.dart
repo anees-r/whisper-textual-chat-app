@@ -4,7 +4,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:textual_chat_app/app_assets.dart';
 import 'package:textual_chat_app/components/chat_bubble.dart';
 import 'package:textual_chat_app/components/my_snackbar.dart';
-import 'package:textual_chat_app/components/my_textfield.dart';
 import 'package:textual_chat_app/services/auth/auth_service.dart';
 import 'package:textual_chat_app/services/chat/chat_service.dart';
 import 'package:textual_chat_app/services/requests/requests_service.dart';
@@ -45,6 +44,7 @@ class _ChatScreenState extends State<ChatScreen> {
       const Duration(milliseconds: 500),
       () => scrollDown(),
     );
+    widget._chatService.markRead(widget._authService.getCurrentUser()!.uid, widget.receiverID);
     super.initState();
   }
 
@@ -52,6 +52,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     myFocusNode.dispose();
     widget._messageController.dispose();
+    widget._chatService.markRead(widget._authService.getCurrentUser()!.uid, widget.receiverID);
     super.dispose();
   }
 
@@ -352,6 +353,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ));
   }
 
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -406,8 +408,7 @@ class _ChatScreenState extends State<ChatScreen> {
         builder: (context, snapshot) {
           String? conditon = snapshot.data;
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Container(
-            );
+            return Container();
           }
           bool unfriended = conditon! == "Removed";
           if (unfriended || showDelete) {
@@ -426,13 +427,16 @@ class _ChatScreenState extends State<ChatScreen> {
           String? conditon = snapshot.data;
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Container(
-              margin: const EdgeInsets.only(bottom: 30),
-              child: SvgPicture.asset(
-                AppAssets.loadingAnimation,
-                color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
-                height: 38,
-                width: 38,)
-            );
+                margin: const EdgeInsets.only(bottom: 30),
+                child: SvgPicture.asset(
+                  AppAssets.loadingAnimation,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .secondaryContainer
+                      .withOpacity(0.5),
+                  height: 38,
+                  width: 38,
+                ));
           }
 
           if (conditon == "Removed" || conditon! == "Blocked") {
@@ -469,12 +473,15 @@ class _ChatScreenState extends State<ChatScreen> {
           // loading
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
-              child: SvgPicture.asset(
-                AppAssets.loadingAnimation,
-                color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
-                height: 40,
-                width: 40,)
-            );
+                child: SvgPicture.asset(
+              AppAssets.loadingAnimation,
+              color: Theme.of(context)
+                  .colorScheme
+                  .secondaryContainer
+                  .withOpacity(0.5),
+              height: 40,
+              width: 40,
+            ));
           }
 
           // if no messages
@@ -594,60 +601,54 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _buildMessageInput() {
     return Container(
       margin: const EdgeInsets.only(bottom: 25, top: 15),
-      child: 
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 25),
-            padding: EdgeInsets.only(top: 4,bottom: 4, left: 20, right: 8),
-            decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.tertiaryContainer,
-                border: Border.all(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .secondaryContainer
-                        .withOpacity(0.2),
-                    width: 1),
-                borderRadius: BorderRadius.circular(500)),
-            child: TextFormField(
-              focusNode: myFocusNode,
-              controller: widget._messageController,
-              obscureText: false,
-              cursorColor: Theme.of(context).colorScheme.primary,
-              style: TextStyle(
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 25),
+        padding: EdgeInsets.only(top: 4, bottom: 4, left: 20, right: 8),
+        decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.tertiaryContainer,
+            border: Border.all(
+                color: Theme.of(context)
+                    .colorScheme
+                    .secondaryContainer
+                    .withOpacity(0.2),
+                width: 1),
+            borderRadius: BorderRadius.circular(500)),
+        child: TextFormField(
+          focusNode: myFocusNode,
+          controller: widget._messageController,
+          obscureText: false,
+          cursorColor: Theme.of(context).colorScheme.primary,
+          style: TextStyle(
+            fontFamily: "Hoves",
+            fontSize: 16,
+            color: Theme.of(context).colorScheme.secondaryContainer,
+          ),
+          decoration: InputDecoration(
+              contentPadding: EdgeInsets.symmetric(vertical: 15),
+              suffixIcon: Container(
+                decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(100)),
+                child: IconButton(
+                  onPressed: sendMessage,
+                  icon: SvgPicture.asset(
+                    AppAssets.sendIcon,
+                    color: AppAssets.darkBackgroundColor,
+                  ),
+                ),
+              ),
+              border: InputBorder.none,
+              hintText: "Whisper here",
+              hintStyle: TextStyle(
                 fontFamily: "Hoves",
                 fontSize: 16,
-                color: Theme.of(context).colorScheme.secondaryContainer,
-              ),
-              decoration: InputDecoration(
-                contentPadding: EdgeInsets.symmetric(vertical: 15),
-                suffixIcon: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(100)
-                  ),
-                  child: IconButton(
-                    onPressed: sendMessage,
-                    icon: SvgPicture.asset(
-                      AppAssets.sendIcon,
-                      color: AppAssets.darkBackgroundColor,
-                    ),
-                  
-                                ),
-                ),
-                border: InputBorder.none,
-                  hintText: "Whisper here",
-                  hintStyle: TextStyle(
-                    fontFamily: "Hoves",
-                    fontSize: 16,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .secondaryContainer
-                        .withOpacity(0.4),
-                  )),
-                  
-            ),
-          ),
-          
-      
+                color: Theme.of(context)
+                    .colorScheme
+                    .secondaryContainer
+                    .withOpacity(0.4),
+              )),
+        ),
+      ),
     );
   }
 }

@@ -24,46 +24,46 @@ class ChatService extends ChangeNotifier {
 
   // get non blocked and non deleted users stream
   Stream<List<Map<String, dynamic>>> getUserStreamExcludingBlockedAndDeleted() {
-  final currentUser = _auth.currentUser;
+    final currentUser = _auth.currentUser;
 
-  // Listen to changes in blocked users
-  final blockedStream = _firestore
-      .collection("users")
-      .doc(currentUser!.uid)
-      .collection("blocked_users")
-      .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) => doc.id).toList());
+    // Listen to changes in blocked users
+    final blockedStream = _firestore
+        .collection("users")
+        .doc(currentUser!.uid)
+        .collection("blocked_users")
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => doc.id).toList());
 
-  // Listen to changes in deleted users
-  final deletedStream = _firestore
-      .collection("users")
-      .doc(currentUser.uid)
-      .collection("deleted_users")
-      .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) => doc.id).toList());
-
-  // Combine the streams of blocked and deleted users
-  return Rx.combineLatest2<List<String>, List<String>, List<String>>(
-    blockedStream,
-    deletedStream,
-    (blockedUserIDs, deletedUserIDs) => blockedUserIDs + deletedUserIDs,
-  ).switchMap((excludedUserIDs) {
-    // Listen to changes in friends and filter out excluded users
-    return _firestore
+    // Listen to changes in deleted users
+    final deletedStream = _firestore
         .collection("users")
         .doc(currentUser.uid)
-        .collection("friends")
+        .collection("deleted_users")
         .snapshots()
-        .map((friendSnapshot) {
-      return friendSnapshot.docs
-          .where((doc) =>
-              doc.data()["email"] != currentUser.email &&
-              !excludedUserIDs.contains(doc.id))
-          .map((doc) => doc.data())
-          .toList();
+        .map((snapshot) => snapshot.docs.map((doc) => doc.id).toList());
+
+    // Combine the streams of blocked and deleted users
+    return Rx.combineLatest2<List<String>, List<String>, List<String>>(
+      blockedStream,
+      deletedStream,
+      (blockedUserIDs, deletedUserIDs) => blockedUserIDs + deletedUserIDs,
+    ).switchMap((excludedUserIDs) {
+      // Listen to changes in friends and filter out excluded users
+      return _firestore
+          .collection("users")
+          .doc(currentUser.uid)
+          .collection("friends")
+          .snapshots()
+          .map((friendSnapshot) {
+        return friendSnapshot.docs
+            .where((doc) =>
+                doc.data()["email"] != currentUser.email &&
+                !excludedUserIDs.contains(doc.id))
+            .map((doc) => doc.data())
+            .toList();
+      });
     });
-  });
-}
+  }
 
   // create a chat room
   Future<void> createChatRoom(String requesterID) async {
@@ -81,6 +81,8 @@ class ChatService extends ChangeNotifier {
       'user2': requesterID,
       'removed': false,
       'blockedby': "",
+      'unreaduser1': 0,
+      'unreaduser2': 0,
     };
 
     // creating chatroom document
@@ -94,6 +96,11 @@ class ChatService extends ChangeNotifier {
     String currentUserEmail = _auth.currentUser!.email!;
     final Timestamp timestamp = Timestamp.now();
 
+    // create chatroomid
+    List<String> ids = [currentUserID, receiverID];
+    ids.sort();
+    String chatRoomId = ids.join("_");
+
     // create new message
     Message newMessage = Message(
         senderId: currentUserID,
@@ -102,18 +109,34 @@ class ChatService extends ChangeNotifier {
         message: message,
         timestamp: timestamp);
 
-    // create chatroom and assign unique id
-    List<String> ids = [currentUserID, receiverID];
-    // ensure both users have same chat room no matter who logs in
-    ids.sort();
-    String chatRoomId = ids.join("_");
-
     // save new message to the database
     await _firestore
         .collection("chat_room")
         .doc(chatRoomId)
         .collection("messages")
         .add(newMessage.toMap());
+
+    // get chatroom document
+    DocumentSnapshot chatroomSnapshot =
+        await _firestore.collection('chat_room').doc(chatRoomId).get();
+    if (chatroomSnapshot.exists) {
+      final data = chatroomSnapshot.data() as Map<String, dynamic>;
+
+      // store unread message count based on sender
+      if (data['user1'] == currentUserID) {
+        final count = data['unreaduser2'];
+        await _firestore
+            .collection('chat_room')
+            .doc(chatRoomId)
+            .update({'unreaduser2': count + 1});
+      } else {
+        final count = data['unreaduser1'];
+        await _firestore
+            .collection('chat_room')
+            .doc(chatRoomId)
+            .update({'unreaduser1': count + 1});
+      }
+    }
   }
 
   // get messages
@@ -129,6 +152,33 @@ class ChatService extends ChangeNotifier {
         .collection("messages")
         .orderBy('timestamp', descending: false)
         .snapshots();
+  }
+
+  // mark as read
+  Future<void> markRead(String userId, otherUsersId) async {
+    List<String> ids = [userId, otherUsersId];
+    ids.sort();
+    String chatRoomId = ids.join("_");
+
+    // mark messages as read
+    DocumentSnapshot chatroomSnapshot =
+        await _firestore.collection('chat_room').doc(chatRoomId).get();
+    if (chatroomSnapshot.exists) {
+      final data = chatroomSnapshot.data() as Map<String, dynamic>;
+
+      // update unread message count based on sender
+      if (data['user1'] == _auth.currentUser!.uid) {
+        _firestore
+            .collection('chat_room')
+            .doc(chatRoomId)
+            .update({'unreaduser1': 0});
+      } else {
+        _firestore
+            .collection('chat_room')
+            .doc(chatRoomId)
+            .update({'unreaduser2': 0});
+      }
+    }
   }
 
   // check blocked and removed friend status
@@ -161,6 +211,29 @@ class ChatService extends ChangeNotifier {
     } else {
       return "";
     }
+  }
+
+  // get unread message count
+  Stream<int> getUnreadMessageCount(String otherUserID) {
+    String currentUserID = _auth.currentUser!.uid;
+    List<String> ids = [otherUserID, currentUserID];
+    ids.sort();
+    String chatRoomId = ids.join("_");
+
+    return _firestore
+        .collection("chat_room")
+        .doc(chatRoomId)
+        .snapshots()
+        .map((snapshot) {
+      if (snapshot.exists) {
+        if (snapshot.data()?['user1'] == currentUserID) {
+          return snapshot.data()?['unreaduser1'];
+        } else {
+          return snapshot.data()?['unreaduser2'];
+        }
+      }
+      return 0;
+    });
   }
 
   // report user
@@ -286,19 +359,20 @@ class ChatService extends ChangeNotifier {
 
   // delte all messages from a chatroom
   Future<void> deleteAllMessages(String chatRoomId) async {
-  final messagesCollection = _firestore
-      .collection("chat_room")
-      .doc(chatRoomId)
-      .collection("messages");
+    final messagesCollection = _firestore
+        .collection("chat_room")
+        .doc(chatRoomId)
+        .collection("messages");
 
-  // Get all documents in the 'messages' collection
-  final messagesSnapshot = await messagesCollection.get();
+    // Get all documents in the 'messages' collection
+    final messagesSnapshot = await messagesCollection.get();
 
-  // Delete each document
-  for (var doc in messagesSnapshot.docs) {
-    await doc.reference.delete();
+    // Delete each document
+    for (var doc in messagesSnapshot.docs) {
+      await doc.reference.delete();
+    }
   }
-}
+
   // delete chat room if the other user is deleted
   Future<void> deleteChatRoom(String userID) async {
     // create chatroom id
