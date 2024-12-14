@@ -421,6 +421,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // display info or the textfield in footer based on friend status
   Widget _checkAndDisplayFooter() {
+    bool isDeleted = widget.receiverEmail == "Deleted Account";
     return FutureBuilder(
         future: ChatService().checkRemovedAndBlocked(widget.receiverID),
         builder: (context, snapshot) {
@@ -439,7 +440,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 ));
           }
 
-          if (conditon == "Removed" || conditon! == "Blocked") {
+          if (conditon == "Removed" || conditon! == "Blocked" || isDeleted) {
+            if(isDeleted){
+              return _showDeleted();
+            }
             if (conditon == "Removed") {
               return _showRemoved();
             } else {
@@ -530,6 +534,39 @@ class _ChatScreenState extends State<ChatScreen> {
           messageID: doc.id,
           userID: data["senderId"],
         ));
+  }
+
+  Widget _showDeleted() {
+    return Container(
+      margin: EdgeInsets.all(25),
+      child: Center(
+          child: Column(
+        children: [
+          Text(
+            "The other whisperer has deleted their account!",
+            style: TextStyle(
+              color: Theme.of(context)
+                  .colorScheme
+                  .secondaryContainer
+                  .withOpacity(0.5),
+              fontFamily: "Hoves",
+              fontSize: 14,
+            ),
+          ),
+          Text(
+            "Delete chat or ignore.",
+            style: TextStyle(
+              color: Theme.of(context)
+                  .colorScheme
+                  .secondaryContainer
+                  .withOpacity(0.3),
+              fontFamily: "Hoves",
+              fontSize: 14,
+            ),
+          ),
+        ],
+      )),
+    );
   }
 
   Widget _showRemoved() {

@@ -72,4 +72,32 @@ class AuthService {
     // delete current user from authentication
     auth.currentUser!.delete();
   }
+
+  // change email to Deleted Account in friends collection
+  Future<void> updateEmailInFriends() async {
+
+  // Fetch all users
+  final userDocs = await _firestore.collection("users").get();
+
+  // Iterate through each user's 'friends' subcollection
+  for (var userDoc in userDocs.docs) {
+    final friendsSubcollection = _firestore
+        .collection("users")
+        .doc(userDoc.id)
+        .collection("friends");
+
+    // Query friends whose email matches currentUserEmail
+    final matchingFriends = await friendsSubcollection
+        .where("email", isEqualTo: auth.currentUser!.email)
+        .get();
+
+    // Update the email field in all matching documents
+    for (var friendDoc in matchingFriends.docs) {
+      await friendsSubcollection.doc(friendDoc.id).update({
+        "email": "Deleted Account",
+      });
+    }
+  }
+}
+
 }

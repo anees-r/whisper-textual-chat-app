@@ -54,6 +54,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ElevatedButton(
                     onPressed: () async {
                       Navigator.pop(context);
+                      Navigator.pop(context);
                       _authService.deleteAccount();
                       mySnackbar(context, "Account Deleted!", Colors.red);
                     },
