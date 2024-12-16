@@ -66,7 +66,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 // cancel button
                 ElevatedButton(
                   onPressed: () {
+                    // pop dialogue
                     Navigator.pop(context);
+                    // clear field
+                    _requestController.clear();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
